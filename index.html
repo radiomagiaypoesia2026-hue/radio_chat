@@ -369,7 +369,7 @@ h1, h2, h3, h4 {
                             <div class="mb-6">
                                 <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
                                     <i class="fas fa-radio text-purple-400"></i>
-                                    <span class="text-purple-300 text-sm font-medium">En Vivo</span>
+                                    <span class="text-purple-300 text-sm font-medium" id="djName">Radio Online 24/7</span>
                                 </div>
                                 <h2 id="songTitle" class="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
                                     Radio Magia & Poesía
@@ -527,17 +527,17 @@ h1, h2, h3, h4 {
 </footer>
 
 <!-- Audio Element -->
-<audio id="audioPlayer" crossorigin="anonymous" preload="none"></audio>
+<audio id="audioPlayer" preload="none"></audio>
 
 <script>
-// Configuración
-const STREAM_URL = 'https://streaming.viphosting.cl:8236/;';
+// Configuración - CAMBIADO: sin ; al final
+const STREAM_URL = 'https://streaming.viphosting.cl:8236/stream'; // Cambia a '/;' si es SHOUTcast v1
 
 // Programación DJ
 const DJ_SCHEDULE = [
     { dia: 'Lunes', nombre: 'Margaret_DJ', hora: '22:00 - 00:00', icon: 'fa-star' },
     { dia: 'Martes', nombre: 'Andrea_DJ', hora: '22:00 - 00:00', icon: 'fa-music' },
-    { dia: 'Miércoles', nombre: 'Margaret_DJ', hora: '22:00 - 00:00', icon: 'fa-star' },
+    { dia: 'Miércoles', nombre: 'Mister-X', hora: '22:00 - 00:00', icon: 'fa-star' },
     { dia: 'Jueves', nombre: 'Halcon_Negro', hora: '22:00 - 00:00', icon: 'fa-feather' },
     { dia: 'Viernes', nombre: 'La_Bruja_DJ', hora: '22:00 - 00:00', icon: 'fa-hat-wizard' },
     { dia: 'Sábado', nombre: 'Ruby_DJ', hora: '22:00 - 00:00', icon: 'fa-gem' },
@@ -549,6 +549,9 @@ let audioPlayer = document.getElementById('audioPlayer');
 let isPlaying = false;
 let volume = 0.8;
 let isMuted = false;
+let reconnectTimeout = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 // Elementos DOM
 const playBtn = document.getElementById('playBtn');
@@ -578,8 +581,8 @@ function createStars() {
 // Renderizar horarios DJ
 function renderDJSchedule() {
     const djGrid = document.getElementById('djGrid');
-    const today = new Date().getDay(); // 0=Domingo, 1=Lunes...
-    const daysMap = [6,0,1,2,3,4,5]; // Mapear a nuestro array
+    const today = new Date().getDay();
+    const daysMap = [6,0,1,2,3,4,5];
     
     djGrid.innerHTML = DJ_SCHEDULE.map((dj, index) => {
         const isToday = daysMap[today] === index;
@@ -616,26 +619,36 @@ function updateCurrentDJ() {
     }
 }
 
-// Play/Pause
+// Play/Pause - MEJORADO
 async function togglePlay() {
     if (isPlaying) {
         audioPlayer.pause();
+        audioPlayer.src = '';
         isPlaying = false;
         playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
         playingIndicator.classList.add('hidden');
+        clearTimeout(reconnectTimeout);
+        reconnectAttempts = 0;
+        statusMsg.classList.add('hidden');
     } else {
         try {
+            statusText.textContent = 'Conectando...';
+            statusMsg.classList.remove('hidden');
+            
             audioPlayer.src = STREAM_URL + '?t=' + Date.now();
             audioPlayer.load();
+            
             await audioPlayer.play();
             isPlaying = true;
             playBtn.innerHTML = '<i class="fas fa-pause"></i>';
             playingIndicator.classList.remove('hidden');
             statusMsg.classList.add('hidden');
             updateCurrentDJ();
+            reconnectAttempts = 0;
         } catch (error) {
-            statusText.textContent = 'No se pudo conectar al stream. Verifica tu conexión.';
+            statusText.textContent = 'No se pudo conectar. Verifica que el stream esté activo.';
             statusMsg.classList.remove('hidden');
+            console.error('Error:', error);
         }
     }
 }
@@ -737,22 +750,40 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
-// Audio events
+// Audio events - MEJORADOS CON RECONEXIÓN
 audioPlayer.addEventListener('error', (e) => {
-    statusText.textContent = 'Error de conexión. Intenta nuevamente.';
-    statusMsg.classList.remove('hidden');
+    console.log('Error de audio:', e);
     isPlaying = false;
     playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
     playingIndicator.classList.add('hidden');
+    
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        statusText.textContent = `Reconectando... intento ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`;
+        statusMsg.classList.remove('hidden');
+        reconnectTimeout = setTimeout(() => {
+            if (!isPlaying) togglePlay();
+        }, 3000);
+    } else {
+        statusText.textContent = 'No se pudo reconectar. El stream puede estar offline.';
+        statusMsg.classList.remove('hidden');
+        reconnectAttempts = 0;
+    }
 });
 
 audioPlayer.addEventListener('stalled', () => {
-    statusText.textContent = 'Reconectando...';
+    statusText.textContent = 'Conexión inestable...';
+    statusMsg.classList.remove('hidden');
+});
+
+audioPlayer.addEventListener('waiting', () => {
+    statusText.textContent = 'Cargando buffer...';
     statusMsg.classList.remove('hidden');
 });
 
 audioPlayer.addEventListener('playing', () => {
     statusMsg.classList.add('hidden');
+    reconnectAttempts = 0;
 });
 
 audioPlayer.addEventListener('pause', () => {
@@ -769,7 +800,7 @@ renderDJSchedule();
 audioPlayer.volume = volume;
 updateVolume(80);
 updateCurrentDJ();
-setInterval(updateCurrentDJ, 60000); // Actualizar cada minuto
+setInterval(updateCurrentDJ, 60000);
 </script>
 </body>
 </html>
