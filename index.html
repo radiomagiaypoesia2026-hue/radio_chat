@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radio|Chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    background: #0a0118;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.glass-effect {
+    background: rgba(26, 19, 51, 0.1);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(139, 92, 246, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.glass-effect-heavy {
+    background: rgba(26, 19, 51, 0.4);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cosmic-bg {
+    background: radial-gradient(ellipse at top, #1e0a3c 0%, #0a0118 50%, #000000 100%);
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+}
+
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+    50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.8); }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.orb1 {
+    width: 400px;
+    height: 400px;
+    background: #8b5cf6;
+    top: -200px;
+    right: -200px;
+    animation: float 8s ease-in-out infinite;
+}
+
+.orb2 {
+    width: 300px;
+    height: 300px;
+    background: #ec4899;
+    bottom: -150px;
+    left: -150px;
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+.play-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.play-btn:hover {
+    transform: scale(1.05);
+}
+
+.play-btn:active {
+    transform: scale(0.95);
+}
+
+.volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(139, 92, 246, 0.2);
+    outline: none;
+    transition: all 0.3s;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
+    transition: all 0.3s;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.7);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.5);
+}
+
+.volume-slider::-moz-range-track {
+    background: rgba(139, 92, 246, 0.2);
+    height: 6px; 
+    border-radius: 3px;
+}
+
+.chat-container {
+    height: calc(100vh - 140px);
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 132px); 
+    }
+}
+
+.nav-link {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    transition: width 0.3s;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+.badge-live {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.eq-bar {
+    width: 3px;
+    background: linear-gradient(to top, #8b5cf6, #ec4899);
+    border-radius: 2px;
+    animation: eq 1s ease-in-out infinite;
+}
+
+.eq-bar:nth-child(1) { animation-delay: 0s; }
+.eq-bar:nth-child(2) { animation-delay: 0.2s; }
+.eq-bar:nth-child(3) { animation-delay: 0.4s; }
+.eq-bar:nth-child(4) { animation-delay: 0.6s; }
+.eq-bar:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes eq {
+    0%, 100% { height: 8px; }
+    50% { height: 24px; }
+}
+
+.dj-card {
+    transition: all 0.3s;
+}
+
+.dj-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+.dj-card.live {
+    border: 1px solid rgba(236, 72, 153, 0.4);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+@media (max-width: 390px) {
+    .volume-slider {
+        width: 60px !important;
+    }
+    .play-btn {
+        width: 56px !important;
+        height: 56px !important;
+    }
+}
+</style>
+</head>
+<body>
+<div class="cosmic-bg"></div>
+<div class="stars" id="stars"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- Header -->
+<header class="fixed top-0 w-full z-50 glass-effect-heavy">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center animate-pulse-glow">
+                    <i class="fas fa-broadcast-tower text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold text-white leading-tight">Radio Magia & Poesía</h1>
+                    <p class="text-xs text-purple-300">Radio Online</p>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="#" class="nav-link text-white text-sm font-medium active" data-section="player">
+                    <i class="fas fa-play-circle mr-2"></i>Prende la Radio
+                </a>
+                <a href="#" class="nav-link text-white text-sm font-medium" data-section="chat">
+                    <i class="fas fa-comments mr-2"></i>Conecta el Chat
+                </a>
+                <a href="#" class="nav-link text-white text-sm font-medium" data-section="horarios">
+                    <i class="fas fa-calendar-alt mr-2"></i>Horarios DJ
+                </a>
+            </nav>
+
+            <button id="mobileMenuBtn" class="md:hidden text-white text-xl" aria-label="Abrir menú">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="fixed inset-0 z-40 glass-effect-heavy transform translate-x-full transition-transform duration-300 md:hidden">
+    <div class="p-6 pt-20">
+        <button id="closeMenuBtn" class="absolute top-6 right-6 text-white text-2xl" aria-label="Cerrar menú">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="flex flex-col gap-4">
+            <a href="#" class="nav-link text-white text-lg font-medium py-3" data-section="player">
+                <i class="fas fa-play-circle mr-3"></i>Radio en Vivo
+            </a>
+            <a href="#" class="nav-link text-white text-lg font-medium py-3" data-section="chat">
+                <i class="fas fa-comments mr-3"></i>Chat en Vivo
+            </a>
+            <a href="#" class="nav-link text-white text-lg font-medium py-3" data-section="horarios">
+                <i class="fas fa-calendar-alt mr-3"></i>Horarios DJ
+            </a>
+        </nav>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="pt-20 pb-6 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Player Section -->
+        <section id="playerSection" class="animate-slide-up">
+            <div class="max-w-4xl mx-auto">
+                <!-- Live Badge -->
+                <div class="flex justify-center mb-6">
+                    <div class="badge-live inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
+                        <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="text-white text-sm font-semibold">TRANSMITIENDO EN VIVO</span>
+                    </div>
+                </div>
+
+                <!-- Main Player Card -->
+                <div class="glass-effect rounded-3xl p-6 md:p-8 mb-6">
+                    <div class="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+                        <!-- Album Art -->
+                        <div class="relative flex-shrink-0">
+                            <div class="w-48 h-48 md:w-56 md:h-56 rounded-2xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center overflow-hidden glass-effect">
+                                <div id="albumArt" class="text-center">
+                                    <i class="fas fa-music text-6xl text-purple-400 opacity-50"></i>
+                                </div>
+                            </div>
+                            <div id="playingIndicator" class="absolute -bottom-2 -right-2 hidden">
+                                <div class="flex gap-1 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-full">
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                    <div class="eq-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info & Controls -->
+                        <div class="flex-1 w-full text-center md:text-left">
+                            <div class="mb-6">
+                                <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                    <i class="fas fa-radio text-purple-400"></i>
+                                    <span class="text-purple-300 text-sm font-medium">En Vivo</span>
+                                </div>
+                                <h2 id="songTitle" class="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
+                                    Radio Magia & Poesía
+                                </h2>
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="flex flex-col items-center md:items-start gap-3 mb-6">
+                                <div class="flex items-center gap-4">
+                                    <button id="playBtn" class="play-btn w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white text-2xl md:text-3xl shadow-lg hover:shadow-purple-500/50" aria-label="Reproducir radio">
+                                        <i class="fas fa-play ml-1"></i>
+                                    </button>
+                                    
+                                    <div class="flex items-center gap-3">
+                                        <i id="volumeIcon" class="fas fa-volume-up text-white text-lg cursor-pointer"></i>
+                                        <input type="range" id="volumeSlider" class="volume-slider w-24 md:w-32" min="0" max="100" value="80">
+                                        <span id="volumeValue" class="text-white text-sm font-medium w-10">80%</span>
+                                    </div>
+                                </div>
+                              
+                               </div>
+
+                            <!-- Status Message -->
+                            <div id="statusMsg" class="hidden">
+                                <div class="flex items-start gap-2 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                                    <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5"></i>
+                                    <p class="text-yellow-200 text-sm" id="statusText"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="glass-effect rounded-2xl p-5 text-center animate-slide-up" style="animation-delay: 0.1s">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center">
+                            <i class="fas fa-headphones text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-white font-semibold mb-1">Música</h3>
+                        <p class="text-purple-300 text-sm">Audio HD 128kbps</p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-2xl p-5 text-center animate-slide-up" style="animation-delay: 0.2s">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center">
+                            <i class="fas fa-users text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-white font-semibold mb-1">Comunidad</h3>
+                        <p class="text-purple-300 text-sm">Chat en vivo</p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-2xl p-5 text-center animate-slide-up" style="animation-delay: 0.3s">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center">
+                            <i class="fas fa-clock text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-white font-semibold mb-1">Tu Radio</h3>
+                        <p class="text-purple-300 text-sm">Siempre contigo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chatSection" class="hidden">
+            <div class="w-full">
+                <div class="glass-effect rounded-none md:rounded-3xl overflow-hidden">
+                    <div class="p-4 border-b border-purple-500/20 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                                <i class="fas fa-comments text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold">Chat en Vivo</h3>
+                                <p class="text-purple-300 text-xs">Conecta con nosotros..</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span class="text-green-400 text-sm font-medium">En línea</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-container">
+                        <iframe 
+                            src="https://www.chatlatinos.cl/appm/?nick=mxsmxslx#Chile" 
+                            width="100%" 
+                            height="100%" 
+                            allowtransparency="yes" 
+                            allow="autoplay" 
+                            frameborder="0" 
+                            marginheight="0" 
+                            marginwidth="0" 
+                            scrolling="auto"
+                            class="bg-transparent"
+                            title="Chat en vivo de Radio Magia y Poesía">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horarios DJ Section -->
+        <section id="horariosSection" class="hidden">
+            <div class="max-w-5xl mx-auto animate-slide-up">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">
+                        <span class="gradient-text">Programación DJ</span>
+                    </h2>
+                    <p class="text-purple-300">Todos los días de 22:00 a 00:00 hrs - Chile</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="djGrid">
+                    <!-- Se llena con JS -->
+                </div>
+
+                <div class="glass-effect rounded-2xl p-6 mt-6 text-center">
+                    <i class="fas fa-info-circle text-purple-400 text-2xl mb-3"></i>
+                    <p class="text-purple-200 text-sm">
+                        La programación puede variar....
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="glass-effect-heavy mt-12">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                    <i class="fas fa-broadcast-tower text-white"></i>
+                </div>
+                <h3 class="text-white text-xl font-bold">Radio Magia & Poesía</h3>
+            </div>
+            <p class="text-purple-300 text-sm mb-4">Radio Magia y Poesia - Transmision Online</p>
+            <div class="flex items-center justify-center gap-6 mb-6">
+                <a href="#" class="text-purple-300 hover:text-white transition">
+                    <i class="fab fa-facebook text-xl"></i>
+                </a>
+                <a href="#" class="text-purple-300 hover:text-white transition">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+                <a href="#" class="text-purple-300 hover:text-white transition">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-purple-300 hover:text-white transition">
+                    <i class="fab fa-youtube text-xl"></i>
+                </a>
+            </div>
+            <p class="text-purple-400 text-xs">©BarT Corporation 2026. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Audio Element -->
+<audio id="audioPlayer" crossorigin="anonymous" preload="none"></audio>
+
+<script>
+// Configuración
+const STREAM_URL = 'https://streaming.viphosting.cl:8236/;';
+
+// Programación DJ
+const DJ_SCHEDULE = [
+    { dia: 'Lunes', nombre: 'Margaret_DJ', hora: '22:00 - 00:00', icon: 'fa-star' },
+    { dia: 'Martes', nombre: 'Andrea_DJ', hora: '22:00 - 00:00', icon: 'fa-music' },
+    { dia: 'Miércoles', nombre: 'Margaret_DJ', hora: '22:00 - 00:00', icon: 'fa-star' },
+    { dia: 'Jueves', nombre: 'Halcon_Negro', hora: '22:00 - 00:00', icon: 'fa-feather' },
+    { dia: 'Viernes', nombre: 'La_Bruja_DJ', hora: '22:00 - 00:00', icon: 'fa-hat-wizard' },
+    { dia: 'Sábado', nombre: 'Ruby_DJ', hora: '22:00 - 00:00', icon: 'fa-gem' },
+    { dia: 'Domingo', nombre: 'Bart_DJ', hora: '22:00 - 00:00', icon: 'fa-microphone-alt' }
+];
+
+// Estado
+let audioPlayer = document.getElementById('audioPlayer');
+let isPlaying = false;
+let volume = 0.8;
+let isMuted = false;
+
+// Elementos DOM
+const playBtn = document.getElementById('playBtn');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeValue = document.getElementById('volumeValue');
+const volumeIcon = document.getElementById('volumeIcon');
+const statusMsg = document.getElementById('statusMsg');
+const statusText = document.getElementById('statusText');
+const playingIndicator = document.getElementById('playingIndicator');
+const djName = document.getElementById('djName');
+
+// Generar estrellas
+function createStars() {
+    const starsContainer = document.getElementById('stars');
+    if(starsContainer.children.length > 0) return;
+    const starCount = 100;
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        starsContainer.appendChild(star);
+    }
+}
+
+// Renderizar horarios DJ
+function renderDJSchedule() {
+    const djGrid = document.getElementById('djGrid');
+    const today = new Date().getDay(); // 0=Domingo, 1=Lunes...
+    const daysMap = [6,0,1,2,3,4,5]; // Mapear a nuestro array
+    
+    djGrid.innerHTML = DJ_SCHEDULE.map((dj, index) => {
+        const isToday = daysMap[today] === index;
+        return `
+            <div class="dj-card glass-effect rounded-2xl p-5 ${isToday ? 'live' : ''}">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600/30 to-pink-600/30 flex items-center justify-center">
+                        <i class="fas ${dj.icon} text-purple-400 text-xl"></i>
+                    </div>
+                    ${isToday ? '<span class="px-2 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-semibold">HOY</span>' : ''}
+                </div>
+                <h3 class="text-white font-bold text-lg mb-1">${dj.nombre}</h3>
+                <p class="text-purple-300 text-sm mb-2">${dj.dia}</p>
+                <div class="flex items-center gap-2 text-purple-400 text-sm">
+                    <i class="fas fa-clock"></i>
+                    <span>${dj.hora} hrs</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Actualizar DJ actual
+function updateCurrentDJ() {
+    const today = new Date().getDay();
+    const daysMap = [6,0,1,2,3,4,5];
+    const currentDJ = DJ_SCHEDULE[daysMap[today]];
+    const hour = new Date().getHours();
+    
+    if(hour >= 22 || hour < 0) {
+        djName.innerHTML = `<i class="fas fa-circle text-pink-500 text-xs mr-2 animate-pulse"></i>Al aire: ${currentDJ.nombre}`;
+    } else {
+        djName.textContent = 'Radio Online 24/7';
+    }
+}
+
+// Play/Pause
+async function togglePlay() {
+    if (isPlaying) {
+        audioPlayer.pause();
+        isPlaying = false;
+        playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+        playingIndicator.classList.add('hidden');
+    } else {
+        try {
+            audioPlayer.src = STREAM_URL + '?t=' + Date.now();
+            audioPlayer.load();
+            await audioPlayer.play();
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            playingIndicator.classList.remove('hidden');
+            statusMsg.classList.add('hidden');
+            updateCurrentDJ();
+        } catch (error) {
+            statusText.textContent = 'No se pudo conectar al stream. Verifica tu conexión.';
+            statusMsg.classList.remove('hidden');
+        }
+    }
+}
+
+// Volume
+function updateVolume(val) {
+    volume = val / 100;
+    audioPlayer.volume = volume;
+    volumeValue.textContent = `${val}%`;
+    
+    if (val == 0 || isMuted) {
+        volumeIcon.className = 'fas fa-volume-mute text-white text-lg cursor-pointer';
+    } else if (val < 50) {
+        volumeIcon.className = 'fas fa-volume-down text-white text-lg cursor-pointer';
+    } else {
+        volumeIcon.className = 'fas fa-volume-up text-white text-lg cursor-pointer';
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    audioPlayer.muted = isMuted;
+    if (isMuted) {
+        volumeIcon.className = 'fas fa-volume-mute text-white text-lg cursor-pointer';
+    } else {
+        updateVolume(volumeSlider.value);
+    }
+}
+
+// Navigation
+function switchSection(section) {
+    const playerSection = document.getElementById('playerSection');
+    const chatSection = document.getElementById('chatSection');
+    const horariosSection = document.getElementById('horariosSection');
+    const main = document.querySelector('main');
+    const container = document.querySelector('main > .container');
+    
+    playerSection.classList.add('hidden');
+    chatSection.classList.add('hidden');
+    horariosSection.classList.add('hidden');
+    
+    if (section === 'chat') {
+        chatSection.classList.remove('hidden');
+        main.classList.remove('pb-6');
+        main.classList.add('pb-0');
+        container.classList.remove('px-4');
+        container.classList.add('px-0', 'md:px-2');
+    } else if (section === 'horarios') {
+        horariosSection.classList.remove('hidden');
+        main.classList.add('pb-6');
+        main.classList.remove('pb-0');
+        container.classList.add('px-4');
+        container.classList.remove('px-0', 'md:px-2');
+    } else {
+        playerSection.classList.remove('hidden');
+        main.classList.add('pb-6');
+        main.classList.remove('pb-0');
+        container.classList.add('px-4');
+        container.classList.remove('px-0', 'md:px-2');
+    }
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.section === section) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Event Listeners
+playBtn.addEventListener('click', togglePlay);
+
+volumeSlider.addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+    isMuted = false;
+});
+
+volumeIcon.addEventListener('click', toggleMute);
+
+// Mobile Menu
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const closeMenuBtn = document.getElementById('closeMenuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+
+mobileMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.remove('translate-x-full');
+});
+
+closeMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.add('translate-x-full');
+});
+
+// Navigation links
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchSection(link.dataset.section);
+        mobileMenu.classList.add('translate-x-full');
+    });
+});
+
+// Audio events
+audioPlayer.addEventListener('error', (e) => {
+    statusText.textContent = 'Error de conexión. Intenta nuevamente.';
+    statusMsg.classList.remove('hidden');
+    isPlaying = false;
+    playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+    playingIndicator.classList.add('hidden');
+});
+
+audioPlayer.addEventListener('stalled', () => {
+    statusText.textContent = 'Reconectando...';
+    statusMsg.classList.remove('hidden');
+});
+
+audioPlayer.addEventListener('playing', () => {
+    statusMsg.classList.add('hidden');
+});
+
+audioPlayer.addEventListener('pause', () => {
+    if(isPlaying) {
+        isPlaying = false;
+        playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+        playingIndicator.classList.add('hidden');
+    }
+});
+
+// Init
+createStars();
+renderDJSchedule();
+audioPlayer.volume = volume;
+updateVolume(80);
+updateCurrentDJ();
+setInterval(updateCurrentDJ, 60000); // Actualizar cada minuto
+</script>
+</body>
+</html>
